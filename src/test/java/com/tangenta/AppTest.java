@@ -68,7 +68,7 @@ public class AppTest extends TestCase {
         scanners.add(createMockScanner(a1));
         scanners.add(createMockScanner(a2));
         scanners.add(createMockScanner(a3));
-        Scanner merger = Merger.of(scanners);
+        Scanner merger = MergeScanner.of(scanners);
 
         String[] expected = { "a", "a", "b", "c", "d", "e", "e", "e", "f" };
         int i = 0;
@@ -96,7 +96,7 @@ public class AppTest extends TestCase {
             return null;
         });
 
-        Optional<WordPosition> oWp = App.collect(Merger.of(scatteredFiles));
+        Optional<WordPosition> oWp = App.collect(MergeScanner.of(scatteredFiles));
         assertTrue(oWp.isPresent());
         assertEquals("b", oWp.get().word);
         assertEquals(0, oWp.get().position);

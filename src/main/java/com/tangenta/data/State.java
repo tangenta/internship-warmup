@@ -8,8 +8,4 @@ public class State {
     public boolean curIsDup;
     
     public State() { }
-
-    public interface StateConverter {
-        void update(State state);
-    }
 }

@@ -1,41 +1,64 @@
 package com.tangenta;
 
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.TreeSet;
-import java.util.function.Function;
-
 import com.tangenta.data.State;
 import com.tangenta.data.WordPosition;
-import com.tangenta.scanner.Merger;
+import com.tangenta.scanner.MergeScanner;
 import com.tangenta.scanner.Scanner;
+import com.tangenta.scanner.TextScanner;
+import com.tangenta.scanner.WordPosScanner;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class App {
-    public static void exportOrderedWords(Scanner scanner, long flushLimitSize,
+    public static Optional<WordPosition> findFirstNonDup(Path textFile, Path tempDir, long flushLimitSize) {
+        TextScanner textScanner = TextScanner.of(textFile, StandardCharsets.UTF_8);
+
+        List<Path> paths = new LinkedList<>();
+        exportOrderedWords(textScanner, flushLimitSize, iter -> {
+            Path newPath = tempDir.resolve(UUID.randomUUID().toString());
+            paths.add(newPath);
+
+            WordPosScanner.write(iter, newPath);
+            return null;
+        });
+
+        return collect(MergeScanner.of(
+                paths.stream()
+                        .map(path -> WordPosScanner.of(path, StandardCharsets.UTF_8))
+                        .collect(Collectors.toList())
+        ));
+    }
+
+    protected static void exportOrderedWords(Scanner scanner, long flushLimitSize,
             Function<Iterator<WordPosition>, Void> flush) {
         TreeSet<WordPosition> words = new TreeSet<>();
-        long counter = 0;
 
         Optional<WordPosition> oWordPos;
         while ((oWordPos = scanner.nextWord()).isPresent()) {
             WordPosition wordPos = oWordPos.get();
+
+            // TODO: remove duplicate words
             words.add(wordPos);
-            counter += 1;
-            if (counter >= flushLimitSize) {
+
+            if (words.size() >= flushLimitSize) {
                 flush.apply(words.iterator());
                 words.clear();
-                counter = 0;
             }
         }
         flush.apply(words.iterator());
     }
 
-    public static Optional<WordPosition> collect(Merger merger) {
+    protected static Optional<WordPosition> collect(MergeScanner mergeScanner) {
         State state = new State();
         int stateId = 0;
 
         while (true) {
-            Optional<WordPosition> oNext = merger.nextWord();
+            Optional<WordPosition> oNext = mergeScanner.nextWord();
             if (!oNext.isPresent()) break;
             WordPosition incoming = oNext.get();
 
@@ -102,6 +125,6 @@ public class App {
     }
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        System.out.println(findFirstNonDup(Paths.get("resources/integ-test.txt"), Paths.get("/tmp"), 2));
     }
 }

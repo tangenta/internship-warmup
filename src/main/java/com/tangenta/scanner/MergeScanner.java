@@ -8,28 +8,28 @@ import java.util.stream.IntStream;
 import com.tangenta.data.Tuple;
 import com.tangenta.data.WordPosition;
 
-public class Merger implements Scanner {
+public class MergeScanner implements Scanner {
     private List<Scanner> scanners;
-    private List<Optional<WordPosition>> lookAheads;
+    private List<Optional<WordPosition>> lookahead;
     
-    private Merger(List<Scanner> scanners) {
+    private MergeScanner(List<Scanner> scanners) {
         this.scanners = scanners;
 
         int size = scanners.size();
-        lookAheads = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            lookAheads.add(scanners.get(i).nextWord());
+        lookahead = new ArrayList<>(size);
+        for (Scanner scanner : scanners) {
+            lookahead.add(scanner.nextWord());
         }
     }
 
-    public static Merger of(List<Scanner> scanners) {
-        return new Merger(scanners);
+    public static MergeScanner of(List<Scanner> scanners) {
+        return new MergeScanner(scanners);
     }
 
     @Override
     public Optional<WordPosition> nextWord() {
-        return IntStream.range(0, lookAheads.size())
-                .mapToObj(i -> Tuple.of(i, lookAheads.get(i)))
+        return IntStream.range(0, lookahead.size())
+                .mapToObj(i -> Tuple.of(i, lookahead.get(i)))
                 .reduce((t1, t2) -> {
                     if (!t1.right.isPresent() && !t2.right.isPresent()) {
                         return t1;
@@ -42,8 +42,8 @@ public class Merger implements Scanner {
                     }
                 }).flatMap(t -> {
                     int index = t.left;
-                    Optional<WordPosition> ret = lookAheads.get(index);
-                    lookAheads.set(index, scanners.get(index).nextWord());
+                    Optional<WordPosition> ret = lookahead.get(index);
+                    lookahead.set(index, scanners.get(index).nextWord());
                     return ret;
                 });
     }
