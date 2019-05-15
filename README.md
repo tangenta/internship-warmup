@@ -84,6 +84,14 @@
 │                   └── AppTest.java
 ```
 
+## API
+
+```java
+public static Optional<WordPosition> findFirstNonDup(Path textFile, Path tempDir, long flushLimitSizeInBytes)
+```
+
+App.java静态方法findFirstNonDup接受文件路径，临时文件目录和冲刷阈值（字节），返回第一个词及其位置，如果不存在这样的词，返回Optional.empty()。
+
 ## 优化措施
 
 1. 从存储介质读取数据时，每次读的量都只有若干个字节，如果每次都触发system call，context switch开销较大，因此可以缓存，一次读入一“块”数据。
