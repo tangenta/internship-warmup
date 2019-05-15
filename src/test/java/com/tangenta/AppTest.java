@@ -42,13 +42,13 @@ public class AppTest extends TestCase {
 
         WordPosition[] expected = { 
                 WordPosition.of("Talk", 1), WordPosition.of("is", 0), WordPosition.of("cheap", 2),
-                WordPosition.of("show", 3), WordPosition.of("me", 5), WordPosition.of("the", 4),
-                WordPosition.of("code", 6), 
+                WordPosition.of("show", 3), WordPosition.of("code", 6), WordPosition.of("me", 5),
+                WordPosition.of("the", 4),
         };
 
         Int calledTimes = new Int(0);
         Int index = new Int(0);
-        App.exportOrderedWords(mockScanner, 2, iter -> {
+        App.exportOrderedWords(mockScanner, 6, iter -> {
             calledTimes.value += 1;
             while (iter.hasNext()) {
                 assertEquals(expected[index.value], iter.next());

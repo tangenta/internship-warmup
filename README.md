@@ -43,7 +43,6 @@
 │   │           └── tangenta
 │   │               ├── App.java				  # 主程序，定义了两个关键过程
 │   │               ├── data					  # 数据结构
-│   │               │   ├── State.java
 │   │               │   ├── Tuple.java
 │   │               │   └── WordPosition.java	  # （词，位置）
 │   │               └── scanner

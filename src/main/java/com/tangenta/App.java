@@ -14,11 +14,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class App {
-    public static Optional<WordPosition> findFirstNonDup(Path textFile, Path tempDir, long flushLimitSize) {
+    public static Optional<WordPosition> findFirstNonDup(Path textFile, Path tempDir, long flushLimitSizeInBytes) {
         TextScanner textScanner = TextScanner.of(textFile, StandardCharsets.UTF_8);
 
         List<Path> paths = new LinkedList<>();
-        exportOrderedWords(textScanner, flushLimitSize, iter -> {
+        exportOrderedWords(textScanner, flushLimitSizeInBytes, iter -> {
             Path newPath = tempDir.resolve(UUID.randomUUID().toString());
             paths.add(newPath);
 
@@ -36,6 +36,7 @@ public class App {
     protected static void exportOrderedWords(Scanner scanner, long flushLimitSize,
             Function<Iterator<WordPosition>, Void> flush) {
         TreeMap<String, WordPosition> map = new TreeMap<>();
+        long byteSize = 0;
 
         Optional<WordPosition> oWordPos;
         while ((oWordPos = scanner.nextWord()).isPresent()) {
@@ -44,14 +45,16 @@ public class App {
             WordPosition oldWordPos = map.get(wordPos.word);
             if (oldWordPos == null) {
                 map.put(wordPos.word, wordPos);
+                byteSize += wordPos.word.getBytes().length;
             } else {
                 WordPosition newWordPos = WordPosition.of(oldWordPos.word, oldWordPos.position, true);
                 map.put(newWordPos.word, newWordPos);
             }
 
-            if (map.size() >= flushLimitSize) {
+            if (byteSize >= flushLimitSize) {
                 flush.apply(map.values().iterator());
                 map.clear();
+                byteSize = 0;
             }
         }
         flush.apply(map.values().iterator());
