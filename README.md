@@ -32,7 +32,6 @@
 
 ```
 .
-├── PingCAP-homework.iml
 ├── pom.xml
 ├── README.md
 ├── resources

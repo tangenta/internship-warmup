@@ -102,6 +102,12 @@ public class AppTest extends TestCase {
         assertEquals(0, oWp.get().position);
     }
 
+    public void testFindFirstNonDup() {
+        Optional<WordPosition> wp = App.findFirstNonDup(Paths.get("resources/integ-test.txt"), Paths.get("/tmp"), 20);
+        assertTrue(wp.isPresent());
+        assertEquals(wp.get().word, "canyoufindme");
+    }
+
     private static Scanner createMockScanner(String[] backingArr) {
         return new Scanner() {
             Int counter = new Int(0);

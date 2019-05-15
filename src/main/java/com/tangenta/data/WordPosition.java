@@ -1,56 +1,47 @@
 package com.tangenta.data;
 
-public class WordPosition implements Comparable<WordPosition> {
+import java.util.Objects;
+
+public class WordPosition {
     public final String word;
     public final long position;
+    public final boolean isDuplicate;
 
-    private WordPosition(String word, long position) {
+    private WordPosition(String word, long position, boolean isDuplicate) {
         this.word = word;
         this.position = position;
+        this.isDuplicate = isDuplicate;
+    }
+
+    public static WordPosition of(String word, long position, boolean isDuplicate) {
+        return new WordPosition(word, position, isDuplicate);
     }
 
     public static WordPosition of(String word, long position) {
-        return new WordPosition(word, position);
+        return new WordPosition(word, position, false);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WordPosition that = (WordPosition) o;
+        return position == that.position &&
+                isDuplicate == that.isDuplicate &&
+                Objects.equals(word, that.word);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (int) (position ^ (position >>> 32));
-        result = prime * result + ((word == null) ? 0 : word.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        WordPosition other = (WordPosition) obj;
-        if (position != other.position)
-            return false;
-        if (word == null) {
-            if (other.word != null)
-                return false;
-        } else if (!word.equals(other.word))
-            return false;
-        return true;
-    }
-    
-
-    @Override
-    public int compareTo(WordPosition that) {
-        int wRes = this.word.compareTo(that.word);
-        if (wRes != 0) return wRes;
-        return Long.compare(this.position, that.position);
+        return Objects.hash(word, position, isDuplicate);
     }
 
     @Override
     public String toString() {
-        return "WordPosition [position=" + position + ", word=" + word + "]";
+        return "WordPosition{" +
+                "word='" + word + '\'' +
+                ", position=" + position +
+                ", isDuplicate=" + isDuplicate +
+                '}';
     }
 }

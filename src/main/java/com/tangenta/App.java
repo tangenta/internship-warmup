@@ -9,7 +9,6 @@ import com.tangenta.scanner.WordPosScanner;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,21 +35,26 @@ public class App {
 
     protected static void exportOrderedWords(Scanner scanner, long flushLimitSize,
             Function<Iterator<WordPosition>, Void> flush) {
-        TreeSet<WordPosition> words = new TreeSet<>();
+        TreeMap<String, WordPosition> map = new TreeMap<>();
 
         Optional<WordPosition> oWordPos;
         while ((oWordPos = scanner.nextWord()).isPresent()) {
             WordPosition wordPos = oWordPos.get();
 
-            // TODO: remove duplicate words
-            words.add(wordPos);
+            WordPosition oldWordPos = map.get(wordPos.word);
+            if (oldWordPos == null) {
+                map.put(wordPos.word, wordPos);
+            } else {
+                WordPosition newWordPos = WordPosition.of(oldWordPos.word, oldWordPos.position, true);
+                map.put(newWordPos.word, newWordPos);
+            }
 
-            if (words.size() >= flushLimitSize) {
-                flush.apply(words.iterator());
-                words.clear();
+            if (map.size() >= flushLimitSize) {
+                flush.apply(map.values().iterator());
+                map.clear();
             }
         }
-        flush.apply(words.iterator());
+        flush.apply(map.values().iterator());
     }
 
     protected static Optional<WordPosition> collect(MergeScanner mergeScanner) {
@@ -125,6 +129,6 @@ public class App {
     }
 
     public static void main(String[] args) {
-        System.out.println(findFirstNonDup(Paths.get("resources/integ-test.txt"), Paths.get("/tmp"), 2));
+        System.out.println();
     }
 }
