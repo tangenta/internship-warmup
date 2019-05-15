@@ -28,6 +28,8 @@
 
 当Read2重复执行，直到没有内容可读时，“原序列第一个不重复的词”及其位置已保存在状态中（如果有的话）。
 
+![](https://raw.githubusercontent.com/tangenta/internship-warmup/master/screenshot/state.png)
+
 ## 目录结构
 
 ```
