@@ -21,6 +21,10 @@ public class WordPosition {
         return new WordPosition(word, position, false);
     }
 
+    public WordPosition modIsDup(boolean isDuplicate) {
+        return new WordPosition(this.word, this.position, isDuplicate);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

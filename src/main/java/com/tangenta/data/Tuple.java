@@ -10,6 +10,14 @@ public class Tuple<L, R> {
     }
 
     public static <L, R> Tuple<L, R> of(L left, R right) {
-        return new Tuple<L,R>(left, right);
+        return new Tuple<>(left, right);
+    }
+
+    public Tuple<L, R> modLeft(L left) {
+        return new Tuple<>(left, this.right);
+    }
+
+    public Tuple<L, R> modRight(R right) {
+        return new Tuple<>(this.left, right);
     }
 }

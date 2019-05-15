@@ -40,7 +40,8 @@ public class WordPosScanner implements Scanner {
             String[] wordPos = line.split(" ");
             String word = wordPos[0];
             long position = Long.parseLong(wordPos[1]);
-            return Optional.of(WordPosition.of(word, position));
+            boolean isDuplicate = Boolean.parseBoolean(wordPos[2]);
+            return Optional.of(WordPosition.of(word, position, isDuplicate));
         }
     }
 
@@ -57,7 +58,7 @@ public class WordPosScanner implements Scanner {
 
         while (iterator.hasNext()) {
             WordPosition wp = iterator.next();
-            out.println(wp.word + " " + wp.position);
+            out.println(wp.word + " " + wp.position + " " + wp.isDuplicate);
         }
 
         out.close();

@@ -1,6 +1,6 @@
 package com.tangenta;
 
-import com.tangenta.data.State;
+import com.tangenta.data.Tuple;
 import com.tangenta.data.WordPosition;
 import com.tangenta.scanner.MergeScanner;
 import com.tangenta.scanner.Scanner;
@@ -58,7 +58,7 @@ public class App {
     }
 
     protected static Optional<WordPosition> collect(MergeScanner mergeScanner) {
-        State state = new State();
+        Tuple<WordPosition, WordPosition> state = Tuple.of(null, null);
         int stateId = 0;
 
         while (true) {
@@ -68,62 +68,49 @@ public class App {
 
             switch (stateId) {
                 case 0: {
-                    state.lastWord = incoming;
-                    state.lastIsDup = false;
+                    state = state.modLeft(incoming);
                     stateId = 1;
                     break;
                 }
                 case 1: {
-                    if (incoming.word.equals(state.lastWord.word)) {
-                        state.lastIsDup = true;
-                        stateId = 2;
+                    if (incoming.word.equals(state.left.word)) {
+                        state = state.modLeft(state.left.modIsDup(true));
                     } else {
-                        state.curWord = incoming;
-                        state.curIsDup = false;
-                        stateId = 3;
+                        if (state.left.isDuplicate) {
+                            state = state.modLeft(incoming);
+                        } else {
+                            state = state.modRight(incoming);
+                            stateId = 2;
+                        }
                     }
                     break;
                 }
                 case 2: {
-                    if (incoming.word.equals(state.lastWord.word)) {
-                        break;
+                    if (incoming.word.equals(state.right.word)) {
+                        state = state.modRight(state.right.modIsDup(true));
                     } else {
-                        state.lastWord = incoming;
-                        state.curIsDup = false;
-                        stateId = 1;
-                        break;
-                    }
-                }
-                case 3: {
-                    if (incoming.word.equals(state.curWord.word)) {
-                        state.curIsDup = true;
-                        stateId = 4;
-                    } else {
-                        WordPosition minPosWord = state.lastWord.position < state.curWord.position ? 
-                                state.lastWord : state.curWord;
-                        state.lastWord = minPosWord;
-                        state.curWord = incoming;
+                        if (state.right.isDuplicate) {
+                            state = state.modRight(incoming);
+                        } else {
+                            WordPosition min = state.left.position < state.right.position ? state.left : state.right;
+                            state = Tuple.of(min, incoming);
+                        }
                     }
                     break;
                 }
-                case 4: {
-                    if (incoming.word.equals(state.curWord.word)) {
-                        break;
-                    } else {
-                        state.curWord = incoming;
-                        state.curIsDup = false;
-                        stateId = 3;
-                        break;
-                    }
-                }
             }
         }
+
         switch (stateId) {
-            case 0: 
-            case 2: return Optional.empty();
-            case 1: 
-            case 4: return Optional.of(state.lastWord);
-            case 3: return state.lastWord.position < state.curWord.position ? Optional.of(state.lastWord) : Optional.of(state.curWord);
+            case 0: return Optional.empty();
+            case 1: return state.left.isDuplicate ? Optional.empty() : Optional.of(state.left);
+            case 2: {
+                if (state.right.isDuplicate) {
+                    return Optional.of(state.left);
+                } else {
+                    return Optional.of(state.left.position < state.right.position ? state.left : state.right);
+                }
+            }
             default: throw new RuntimeException();
         }
     }
